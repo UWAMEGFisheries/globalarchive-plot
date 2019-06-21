@@ -1,59 +1,72 @@
-fluidPage(
-
-  # App title ----
-  titlePanel("Uploading Files"),
-
-  # Sidebar layout with input and output definitions ----
-  sidebarLayout(
-
-    # Sidebar panel for inputs ----
-    sidebarPanel(
-
-      # Input: Select a file ----
-      fileInput("file1", "Choose CSV File",
-                multiple = TRUE,
-                accept = c("text/csv",
-                         "text/comma-separated-values,text/plain",
-                         ".csv")),
-
-      # Horizontal line ----
-      tags$hr(),
-
-      # Input: Checkbox if file has header ----
-      checkboxInput("header", "Header", TRUE),
-
-      # Input: Select separator ----
-      radioButtons("sep", "Separator",
-                   choices = c(Comma = ",",
-                               Semicolon = ";",
-                               Tab = "\t"),
-                   selected = ","),
-
-      # Input: Select quotes ----
-      radioButtons("quote", "Quote",
-                   choices = c(None = "",
-                               "Double Quote" = '"',
-                               "Single Quote" = "'"),
-                   selected = '"'),
-
-      # Horizontal line ----
-      tags$hr(),
-
-      # Input: Select number of rows to display ----
-      radioButtons("disp", "Display",
-                   choices = c(Head = "head",
-                               All = "all"),
-                   selected = "head")
-
-    ),
-
-    # Main panel for displaying outputs ----
-    mainPanel(
-
-      # Output: Data file ----
-      tableOutput("contents")
-
+navbarPage(
+  "Plot GlobalArchive data",
+  tabPanel(
+    "Upload Data",
+    sidebarLayout(
+      sidebarPanel(
+        
+        fileInput("complete.maxn", "Upload complete maxn FST File",
+                  accept = c("image/vnd.fst",
+                             ".fst")),
+        
+        fileInput("complete.length", "Upload complete length FST File",
+                  accept = c("image/vnd.fst",
+                             ".fst"))),
+    mainPanel(plotOutput(outputId= "line.plot.test", height = "300px")))),
+  tabPanel(
+    "MaxN",
+    sidebarLayout(
+      sidebarPanel(
+        
+        #fileInput("complete.maxn", "Upload complete maxn FST File",
+        #          accept = c("image/vnd.fst",
+        #          ".fst")),
+        
+        # Select campaignid
+        selectInput(inputId = "campaignid.selector", label = "CampaignID",
+                    choices = NULL),
+        # Select metric
+        htmlOutput("key.selector"),
+        # Select Fam, Gen and spe
+        htmlOutput("family.selector",multiple=TRUE),
+        htmlOutput("genus.selector",multiple=TRUE),
+        htmlOutput("species.selector",multiple=TRUE)
+      ),
+      mainPanel(
+        leafletOutput(outputId = "spatial.plot", height = "500px"),
+        plotOutput(outputId = "status.plot", height = "300px"),
+        plotOutput(outputId = "location.plot", height = "300px"),
+        plotOutput(outputId = "site.plot", height = "300px")
+      )
     )
-
+  ),
+  tabPanel(
+    "Length",
+    sidebarLayout(
+      sidebarPanel(
+        #
+        #fileInput("complete.length", "Upload complete length FST File",
+        #          accept = c("image/vnd.fst",
+        #                     ".fst")),
+        
+        # Select campaignid
+        selectInput(inputId = "length.campaignid.selector", label = "CampaignID",
+                    choices = NULL),
+        # Select metric
+        #htmlOutput("length.key.selector"),
+        # Select Fam, Gen and spe
+        htmlOutput("length.family.selector"),
+        htmlOutput("length.genus.selector"),
+        htmlOutput("length.species.selector"),
+        
+        helpText(h4("",
+                    "Adjust plotting parameters below.")),
+        radioButtons("length.colour.fill", "Colour and Fill by",choices = list("Status" = "status", "Location" = "location","Site" = "site"),selected = "status"),
+        numericInput("binwidth","Binwidth", value = 5)),
+      mainPanel(
+        plotOutput(outputId = "length.histogram", height = "300px"),
+        leafletOutput(outputId = "length.spatial.plot", height = "500px")
+      )
+    )
   )
 )
