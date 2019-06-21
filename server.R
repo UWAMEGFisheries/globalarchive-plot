@@ -2,6 +2,7 @@
 function(input, output, session) {
 
   # Populate the CampaignID dropdown when the app loads
+  ## Read in data and create campaign id drop downs----
   observe({
     
     req(input$complete.maxn)
@@ -54,7 +55,7 @@ function(input, output, session) {
     updateSelectInput(session, "mass.campaignid.selector", choices = options, selected = "All")
   })
   
-  # Create a dropdown
+  # Create a dropdown function -----
   create_dropdown <- function(input_name, choices, label) {
     if (!is.null(input[[input_name]]) && input[[input_name]] %in% choices) {
       selected <- input[[input_name]] 
@@ -70,6 +71,7 @@ function(input, output, session) {
     )
   }
   
+  # Create MaxN reactive data frame ----
   campaignid_data <- reactive({
     req(input$campaignid.selector)
     maxn.data <- fst::read_fst(input$complete.maxn$datapath)%>%
@@ -85,6 +87,7 @@ function(input, output, session) {
     }
   })
   
+  # Create Length reactive data frame ----
   length_campaignid_data <- reactive({
     req(input$length.campaignid.selector)
     length.data <- fst::read_fst(input$complete.length$datapath)%>%
@@ -100,21 +103,24 @@ function(input, output, session) {
     }
   })
   
-  # output$key.selector <- renderUI({
-  #   
-  #   df<-campaignid_data()
-  #   
-  #   if (!is.null(df)) {
-  #     options <- df %>%
-  #       dplyr::distinct(key) %>%
-  #       dplyr::pull("key")
-  #     create_dropdown("key.selector", options, "Metric:")
-  #   }
-  # })
-
-  output$family.selector <- renderUI({
-   # req(input$key.selector)
+  # Create Mass reactive data frame ----
+  mass_campaignid_data <- reactive({
+    req(input$mass.campaignid.selector)
+    mass.data <- fst::read_fst(input$complete.mass$datapath)%>%
+      as.data.frame()
     
+    if (input$mass.campaignid.selector == "All") {
+      mass.data
+      
+    } else {
+      campaign.name <- input$mass.campaignid.selector
+      filter(mass.data, campaignid == campaign.name)
+    }
+  })
+  
+  # Create family drop down for MaxN ----
+  output$family.selector <- renderUI({
+
     if (input$campaignid.selector == "All") {
       df<-campaignid_data()
       
@@ -125,7 +131,6 @@ function(input, output, session) {
         sort()
       
       create_dropdown("family.selector", options, "Family:")
-      
       
     } else {
       
@@ -146,36 +151,75 @@ function(input, output, session) {
       
       create_dropdown("family.selector", options, "Family:")
     }
-    # options <- campaignid_data() %>%
-    #   filter(key == input$key.selector) %>%
-    #   distinct(family) %>%
-    #   pull("family")%>%
-    #   sort()
-    # create_dropdown("family.selector", options, "Family:")
   })
-  
+
+  # Create family drop down for Length ----
   output$length.family.selector <- renderUI({
-
-      options <- length_campaignid_data() %>%
+    
+    if (input$length.campaignid.selector == "All") {
+      df<-length_campaignid_data()
+      
+      options <- df %>%
         distinct(family) %>%
-        pull("family") %>%
+        pull("family")%>%
         sort()
+      
       create_dropdown("length.family.selector", options, "Family:")
+      
+    } else {
+      
+      df<-length_campaignid_data()
+      
+      family.genus.species.to.keep<-df%>%
+        filter(number>0)%>%
+        filter(campaignid == input$length.campaignid.selector)%>%
+        distinct(family,genus,species)
+      
+      options <- df %>%
+        filter(campaignid == input$length.campaignid.selector) %>%
+        semi_join(family.genus.species.to.keep)%>%
+        distinct(family) %>%
+        pull("family")%>%
+        sort()
+      
+      create_dropdown("length.family.selector", options, "Family:")
+    }
   })
   
-  # output$key.selector <- renderUI({
-  #   
-  #   df<-campaignid_data()
-  #   
-  #   if (!is.null(df)) {
-  #     options <- df %>%
-  #       dplyr::distinct(key) %>%
-  #       dplyr::pull("key")%>%
-  #       sort()
-  #     create_dropdown("key.selector", options, "Metric:")
-  #   }
-  # })
+  # Create family drop down for Mass ----
+  output$mass.family.selector <- renderUI({
+    
+    if (input$mass.campaignid.selector == "All") {
+      df<-mass_campaignid_data()
+      
+      options <- df %>%
+        distinct(family) %>%
+        pull("family")%>%
+        sort()
+      
+      create_dropdown("mass.family.selector", options, "Family:")
+      
+    } else {
+      
+      df<-mass_campaignid_data()
+      
+      family.genus.species.to.keep<-df%>%
+        filter(mass.g>0)%>%
+        filter(campaignid == input$mass.campaignid.selector)%>%
+        distinct(family,genus,species)
+      
+      options <- df %>%
+        filter(campaignid == input$mass.campaignid.selector) %>%
+        semi_join(family.genus.species.to.keep)%>%
+        distinct(family) %>%
+        pull("family")%>%
+        sort()
+      
+      create_dropdown("mass.family.selector", options, "Family:")
+    }
+  })
 
+  # Create genus drop down for MaxN ----
   output$genus.selector <- renderUI({
     req(input$family.selector)
     
@@ -211,31 +255,83 @@ function(input, output, session) {
       
       create_dropdown("genus.selector", options, "Genus:")
     }
-    
-    # options <- campaignid_data() %>%
-    #   filter(
-    #     key == input$key.selector,
-    #     family == input$family.selector
-    #   ) %>%
-    #   distinct(genus) %>%
-    #   pull("genus")%>%
-    #   sort()
-    # create_dropdown("genus.selector", options, "Genus:")
   })
   
+  
+  # Create genus drop down for Length ----
   output$length.genus.selector <- renderUI({
-    req(input$length.campaignid.selector, input$length.family.selector)
-    options <- length_campaignid_data() %>%
-      filter(
-        #key == input$length.key.selector,
-        family == input$length.family.selector
-      ) %>%
-      distinct(genus) %>%
-      pull("genus")%>%
-      sort()
-    create_dropdown("length.genus.selector", options, "Genus:")
+    req(input$length.family.selector)
+    
+    if (input$length.campaignid.selector == "All") {
+      df<-length_campaignid_data()
+      
+      options <- df %>%
+        filter(family == input$length.family.selector) %>%
+        distinct(genus) %>%
+        pull("genus")%>%
+        sort()
+      create_dropdown("length.genus.selector", options, "Genus:")
+      
+      
+    } else {
+      
+      df<-length_campaignid_data()
+      
+      family.genus.species.to.keep<-df%>%
+        filter(number>0)%>%
+        filter(campaignid == input$length.campaignid.selector)%>%
+        distinct(family,genus,species)
+      
+      options <- df %>%
+        filter(campaignid == input$length.campaignid.selector) %>%
+        filter(family == input$length.family.selector) %>%
+        semi_join(family.genus.species.to.keep)%>%
+        distinct(genus) %>%
+        pull("genus")%>%
+        sort()
+      
+      create_dropdown("length.genus.selector", options, "Genus:")
+    }
+  })
+  
+  
+  # Create genus drop down for Mass ----
+  output$mass.genus.selector <- renderUI({
+    req(input$mass.family.selector)
+    
+    if (input$mass.campaignid.selector == "All") {
+      df<-mass_campaignid_data()
+      
+      options <- df %>%
+        filter(family == input$mass.family.selector) %>%
+        distinct(genus) %>%
+        pull("genus")%>%
+        sort()
+      create_dropdown("mass.genus.selector", options, "Genus:")
+      
+      
+    } else {
+      
+      df<-mass_campaignid_data()
+      
+      family.genus.species.to.keep<-df%>%
+        filter(mass.g>0)%>%
+        filter(campaignid == input$mass.campaignid.selector)%>%
+        distinct(family,genus,species)
+      
+      options <- df %>%
+        filter(campaignid == input$mass.campaignid.selector) %>%
+        filter(family == input$mass.family.selector) %>%
+        semi_join(family.genus.species.to.keep)%>%
+        distinct(genus) %>%
+        pull("genus")%>%
+        sort()
+      
+      create_dropdown("mass.genus.selector", options, "Genus:")
+    }
   })
 
+  # Create species drop down for MaxN ----
   output$species.selector <- renderUI({
     req(input$family.selector, input$genus.selector)
     
@@ -265,7 +361,6 @@ function(input, output, session) {
         distinct(family,genus,species)
       
       options <- df %>%
-        #filter(key == input$key.selector) %>%
         filter(campaignid == input$campaignid.selector) %>%
         filter(family == input$family.selector,
           genus == input$genus.selector) %>%
@@ -276,46 +371,101 @@ function(input, output, session) {
         sort()
       create_dropdown("species.selector", options, "Species:")
     }
-    # options <- campaignid_data() %>%
-    #   filter(
-    #     key == input$key.selector,
-    #     family == input$family.selector,
-    #     genus == input$genus.selector
-    #   ) %>%
-    #   dplyr::select("species") %>%
-    #   distinct() %>%
-    #   pull("species")%>%
-    #   sort()
-    # create_dropdown("species.selector", options, "Species:")
   })
   
+  
+  # Create species drop down for Length ----
   output$length.species.selector <- renderUI({
-    req(input$length.campaignid.selector, input$length.family.selector, input$length.genus.selector)
-    options <- length_campaignid_data() %>%
-      filter(
-        #key == input$length.key.selector,
-        family == input$length.family.selector,
-        genus == input$length.genus.selector
-      ) %>%
-      dplyr::select("species") %>%
-      distinct() %>%
-      pull("species")%>%
-      sort()
-    create_dropdown("length.species.selector", options, "Species:")
+    req(input$length.family.selector, input$length.genus.selector)
+    
+    if (input$length.campaignid.selector == "All") {
+      df<-length_campaignid_data()
+      
+      options <- df %>%
+        filter(family == input$length.family.selector,
+          genus == input$length.genus.selector) %>%
+        dplyr::select("species") %>%
+        distinct() %>%
+        pull("species")%>%
+        sort()
+      create_dropdown("length.species.selector", options, "Species:")
+      
+      
+    } else {
+      
+      df<-length_campaignid_data()
+      
+      family.genus.species.to.keep<-df%>%
+        filter(number>0)%>%
+        filter(campaignid == input$length.campaignid.selector)%>%
+        distinct(family,genus,species)
+      
+      options <- df %>%
+        filter(campaignid == input$length.campaignid.selector) %>%
+        filter(family == input$length.family.selector,
+               genus == input$length.genus.selector) %>%
+        semi_join(family.genus.species.to.keep)%>%
+        dplyr::select("species") %>%
+        distinct() %>%
+        pull("species")%>%
+        sort()
+      create_dropdown("length.species.selector", options, "Species:")
+    }
   })
   
-
+  
+  # Create species drop down for Mass ----
+  output$mass.species.selector <- renderUI({
+    req(input$mass.family.selector, input$mass.genus.selector)
+    
+    if (input$mass.campaignid.selector == "All") {
+      df<-mass_campaignid_data()
+      
+      options <- df %>%
+        filter(
+          family == input$mass.family.selector,
+          genus == input$mass.genus.selector) %>%
+        dplyr::select("species") %>%
+        distinct() %>%
+        pull("species")%>%
+        sort()
+      create_dropdown("mass.species.selector", options, "Species:")
+      
+      
+    } else {
+      
+      df<-mass_campaignid_data()
+      
+      family.genus.species.to.keep<-df%>%
+        filter(mass.g>0)%>%
+        filter(campaignid == input$mass.campaignid.selector)%>%
+        distinct(family,genus,species)
+      
+      options <- df %>%
+        filter(campaignid == input$mass.campaignid.selector) %>%
+        filter(family == input$mass.family.selector,
+               genus == input$mass.genus.selector) %>%
+        semi_join(family.genus.species.to.keep)%>%
+        dplyr::select("species") %>%
+        distinct() %>%
+        pull("species")%>%
+        sort()
+      create_dropdown("mass.species.selector", options, "Species:")
+    }
+  })
+  
+# Maxn data ----
   trends_data <- reactive({
     req(input$family.selector, input$genus.selector, input$species.selector)
     campaignid_data() %>%
       filter(
-        #key == input$key.selector,
         family == input$family.selector,
         genus == input$genus.selector,
         species == input$species.selector
       )
   })
   
+  # Length data ----
   length_trends_data <- reactive({
     req(input$length.family.selector, input$length.genus.selector, input$length.species.selector)
     length_campaignid_data() %>%
@@ -326,9 +476,19 @@ function(input, output, session) {
       )
   })
   
+  # Mass data ----
+  mass_trends_data <- reactive({
+    req(input$mass.family.selector, input$mass.genus.selector, input$mass.species.selector)
+    mass_campaignid_data() %>%
+      filter(family == input$mass.family.selector,
+        genus == input$mass.genus.selector,
+        species == input$mass.species.selector )
+  })
+  
 
   # Create scatterplot object the plotOutput function is expecting
 
+  # Maxn Status ----
   output$status.plot <- renderPlot({
     ggplot(trends_data(),aes(x = factor(status), y = maxn, colour = status, fill = status,notch=FALSE, outlier.shape = NA)) + 
       #scale_fill_manual("",values=c("No-take"="lightgrey","Fished"="lightgrey"))+
@@ -343,6 +503,8 @@ function(input, output, session) {
       ggtitle("Plot of abundance by Status")+
       Theme1
   })
+  
+  # maxn Location ----
   
   output$location.plot <- renderPlot({
     ggplot(trends_data(),aes(x = factor(location), y = maxn, colour = location, fill = location,notch=FALSE, outlier.shape = NA)) + 
@@ -359,6 +521,7 @@ function(input, output, session) {
       Theme1
   })
   
+  # Maxn Site ----
   output$site.plot <- renderPlot({
     ggplot(trends_data(),aes(x = factor(site), y = maxn, colour = site, fill = site,notch=FALSE, outlier.shape = NA)) + 
       #scale_fill_manual("",values=c("No-take"="lightgrey","Fished"="lightgrey"))+
@@ -374,15 +537,47 @@ function(input, output, session) {
       Theme1
   })
   
+  # Length histogram ----
   output$length.histogram <- renderPlot({
     ggplot(length_trends_data(),aes(x = length,colour = status,fill=status))+
-      geom_histogram(alpha=0.5, position="identity",binwidth=input$binwidth)+
+      geom_histogram(alpha=0.5, position="identity",binwidth=input$length.binwidth)+
       #geom_density(alpha=0.6)+
       xlab("Length (mm)") + ylab("Count") +
       theme_bw() +
       Theme1
   })
+  
+  # Mass histogram -----
+  output$mass.histogram <- renderPlot({
+    ggplot(mass_trends_data(),aes(x = mass.g,colour = status,fill=status))+
+      geom_histogram(alpha=0.5, position="identity",binwidth=input$mass.binwidth)+
+      #geom_density(alpha=0.6)+
+      xlab("Mass (g)") + ylab("Count") +
+      theme_bw() +
+      Theme1
+  })
+  
+  # Length vs. Range
+  output$length.vs.range <- renderPlot({
+    ggplot(length_trends_data(), aes(x = range,y = length)) +
+    geom_point()+
+    geom_smooth()+
+      xlab("Range (mm)") + ylab("Length (mm)") +
+      theme_bw() +
+      Theme1
+  })
+  
+  # Biomass vs. Length
+  output$length.vs.mass <- renderPlot({
+    ggplot(mass_trends_data(), aes(x = length,y = mass.g)) +
+      geom_point()+
+      geom_smooth()+
+      xlab("Length (mm)") + ylab("Mass (g)") +
+      theme_bw() +
+      Theme1
+  })
 
+  # Maxn Spatial plot ----
   # Create spatial plot
   output$spatial.plot <- renderLeaflet({
     map <- leaflet(trends_data()) %>%

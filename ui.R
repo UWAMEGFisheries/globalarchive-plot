@@ -66,9 +66,10 @@ navbarPage(
         helpText(h4("",
                     "Adjust plotting parameters below.")),
         radioButtons("length.colour.fill", "Colour and Fill by",choices = list("Status" = "status", "Location" = "location","Site" = "site"),selected = "status"),
-        numericInput("binwidth","Binwidth", value = 5)),
+        numericInput("length.binwidth","Binwidth", value = 5)),
       mainPanel(
         plotOutput(outputId = "length.histogram", height = "300px"),
+        plotOutput(outputId = "length.vs.range", height = "300px"),
         leafletOutput(outputId = "length.spatial.plot", height = "500px")
       )
     )
@@ -95,9 +96,10 @@ navbarPage(
         helpText(h4("",
                     "Adjust plotting parameters below.")),
         radioButtons("mass.colour.fill", "Colour and Fill by",choices = list("Status" = "status", "Location" = "location","Site" = "site"),selected = "status"),
-        numericInput("binwidth","Binwidth", value = 5)),
+        numericInput("mass.binwidth","Binwidth", value = 5)),
       mainPanel(
         plotOutput(outputId = "mass.histogram", height = "300px"),
+        plotOutput(outputId = "length.vs.mass", height = "300px"),
         leafletOutput(outputId = "mass.spatial.plot", height = "500px")
       )
     )
