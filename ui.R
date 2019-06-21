@@ -26,7 +26,7 @@ navbarPage(
         selectInput(inputId = "campaignid.selector", label = "CampaignID",
                     choices = NULL),
         # Select metric
-        htmlOutput("key.selector"),
+        #htmlOutput("key.selector"),
         # Select Fam, Gen and spe
         htmlOutput("family.selector",multiple=TRUE),
         htmlOutput("genus.selector",multiple=TRUE),

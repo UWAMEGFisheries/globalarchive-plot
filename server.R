@@ -1,3 +1,4 @@
+
 function(input, output, session) {
 
   # Populate the CampaignID dropdown when the app loads
@@ -83,26 +84,26 @@ function(input, output, session) {
     }
   })
   
-  output$key.selector <- renderUI({
-    
-    df<-campaignid_data()
-    
-    if (!is.null(df)) {
-      options <- df %>%
-        dplyr::distinct(key) %>%
-        dplyr::pull("key")
-      create_dropdown("key.selector", options, "Metric:")
-    }
-  })
+  # output$key.selector <- renderUI({
+  #   
+  #   df<-campaignid_data()
+  #   
+  #   if (!is.null(df)) {
+  #     options <- df %>%
+  #       dplyr::distinct(key) %>%
+  #       dplyr::pull("key")
+  #     create_dropdown("key.selector", options, "Metric:")
+  #   }
+  # })
 
   output$family.selector <- renderUI({
-    req(input$key.selector)
+   # req(input$key.selector)
     
     if (input$campaignid.selector == "All") {
       df<-campaignid_data()
       
       options <- df %>%
-        filter(key == input$key.selector) %>%
+        #filter(key == input$key.selector) %>%
         distinct(family) %>%
         pull("family")%>%
         sort()
@@ -120,7 +121,7 @@ function(input, output, session) {
         distinct(family,genus,species)
       
       options <- df %>%
-        filter(key == input$key.selector) %>%
+        #filter(key == input$key.selector) %>%
         filter(campaignid == input$campaignid.selector) %>%
         semi_join(family.genus.species.to.keep)%>%
         distinct(family) %>%
@@ -146,28 +147,27 @@ function(input, output, session) {
       create_dropdown("length.family.selector", options, "Family:")
   })
   
-  
-  output$key.selector <- renderUI({
-    
-    df<-campaignid_data()
-    
-    if (!is.null(df)) {
-      options <- df %>%
-        dplyr::distinct(key) %>%
-        dplyr::pull("key")%>%
-        sort()
-      create_dropdown("key.selector", options, "Metric:")
-    }
-  })
+  # output$key.selector <- renderUI({
+  #   
+  #   df<-campaignid_data()
+  #   
+  #   if (!is.null(df)) {
+  #     options <- df %>%
+  #       dplyr::distinct(key) %>%
+  #       dplyr::pull("key")%>%
+  #       sort()
+  #     create_dropdown("key.selector", options, "Metric:")
+  #   }
+  # })
 
   output$genus.selector <- renderUI({
-    req(input$key.selector, input$family.selector)
+    req(input$family.selector)
     
     if (input$campaignid.selector == "All") {
       df<-campaignid_data()
       
       options <- df %>%
-        filter(key == input$key.selector,
+        filter(#key == input$key.selector,
                family == input$family.selector) %>%
         distinct(genus) %>%
         pull("genus")%>%
@@ -185,7 +185,7 @@ function(input, output, session) {
         distinct(family,genus,species)
       
       options <- df %>%
-        filter(key == input$key.selector) %>%
+        #filter(key == input$key.selector) %>%
         filter(campaignid == input$campaignid.selector) %>%
         filter(family == input$family.selector) %>%
         semi_join(family.genus.species.to.keep)%>%
@@ -221,14 +221,14 @@ function(input, output, session) {
   })
 
   output$species.selector <- renderUI({
-    req(input$key.selector, input$family.selector, input$genus.selector)
+    req(input$family.selector, input$genus.selector)
     
     if (input$campaignid.selector == "All") {
       df<-campaignid_data()
       
       options <- df %>%
         filter(
-          key == input$key.selector,
+          #key == input$key.selector,
           family == input$family.selector,
           genus == input$genus.selector
         ) %>%
@@ -249,7 +249,7 @@ function(input, output, session) {
         distinct(family,genus,species)
       
       options <- df %>%
-        filter(key == input$key.selector) %>%
+        #filter(key == input$key.selector) %>%
         filter(campaignid == input$campaignid.selector) %>%
         filter(family == input$family.selector,
           genus == input$genus.selector) %>%
@@ -290,10 +290,10 @@ function(input, output, session) {
   
 
   trends_data <- reactive({
-    req(input$key.selector, input$family.selector, input$genus.selector, input$species.selector)
+    req(input$family.selector, input$genus.selector, input$species.selector)
     campaignid_data() %>%
       filter(
-        key == input$key.selector,
+        #key == input$key.selector,
         family == input$family.selector,
         genus == input$genus.selector,
         species == input$species.selector
