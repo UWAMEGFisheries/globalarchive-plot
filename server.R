@@ -38,6 +38,22 @@ function(input, output, session) {
     updateSelectInput(session, "length.campaignid.selector", choices = options, selected = "All")
   })
   
+  observe({
+      req(input$complete.mass)
+    mass.data<-fst::read_fst(input$complete.mass$datapath)%>%
+      dplyr::mutate(key="mass")%>%
+      dplyr::mutate(value=mass.g)%>%
+      as.data.frame()
+    
+    options <- mass.data %>%
+      dplyr::distinct(campaignid) %>% 
+      pull("campaignid")%>%
+      sort()
+    
+    options <- c("All", options)
+    updateSelectInput(session, "mass.campaignid.selector", choices = options, selected = "All")
+  })
+  
   # Create a dropdown
   create_dropdown <- function(input_name, choices, label) {
     if (!is.null(input[[input_name]]) && input[[input_name]] %in% choices) {
