@@ -1,6 +1,17 @@
 
 function(input, output, session) {
-
+  
+    output$downloadData <- downloadHandler(
+      filename <- function() {
+        paste("example-plotting-script", "R", sep=".")
+      },
+      
+      content <- function(file) {
+        file.copy("example-plotting-script.R", file)
+      },
+      contentType = "R File/R"
+    )
+  
   # Populate the CampaignID dropdown when the app loads
   ## Read in data and create campaign id drop downs----
   observe({
@@ -500,8 +511,7 @@ function(input, output, session) {
       Theme1+
       xlab("Status") + ylab("Abundance per stereo-BRUV") +
       theme_bw() +
-      ggtitle("Plot of abundance by Status")+
-      Theme1
+      ggtitle("Plot of abundance by Status")
   })
   
   # maxn Location ----

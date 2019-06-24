@@ -103,5 +103,41 @@ navbarPage(
         leafletOutput(outputId = "mass.spatial.plot", height = "500px")
       )
     )
-  )
+  ),
+  tabPanel(
+    "Download Scripts",
+    #headerPanel("Simple Shiny Ace!"),
+    sidebarPanel(
+      downloadButton("downloadData", label = "Download"),
+      #selectInput("mode", "Mode: ", choices = modes, selected = "plain_text"),
+      #selectInput("theme", "Theme: ", choices = themes, selected = "textmate"),
+      #numericInput("size", "Tab size:", 4),
+      #radioButtons("soft", NULL, c("Soft tabs" = TRUE, "Hard tabs" = FALSE), inline = TRUE),
+      #radioButtons("invisible", NULL, c("Hide invisibles" = FALSE, "Show invisibles" = TRUE), inline = TRUE),
+      #actionButton("reset", "Reset text"),
+      #actionButton("clear", "Clear text"),
+      HTML("<hr />"),
+      helpText(HTML("A simple Shiny Ace editor.
+                  <p>Created using <a href = \"http://github.com/trestletech/shinyAce\">shinyAce</a>."))
+    ),
+    mainPanel(
+      aceEditor("ace", theme = "tomorrow_night_blue", mode = "r", value = "# functions for summarising data on plots----
+se <- function(x) sd(x) / sqrt(length(x))
+
+# se <- function(x) sd(x) / sqrt(length(x))
+se.min <- function(x) (mean(x)) - se(x)
+se.max <- function(x) (mean(x)) + se(x)
+
+# status plot
+ggplot(trends_data(),aes(x = factor(status), y = maxn, colour = status, fill = status,notch=FALSE, outlier.shape = NA))+ 
+      theme( panel.background = element_blank(),axis.line = element_line(colour = \"black\"))+
+      stat_boxplot(geom='errorbar')+
+      geom_boxplot(outlier.color = NA, notch=FALSE)+
+      stat_summary(fun.y=mean, geom=\"point\", shape=23, size=4)+ #this is adding the dot for the mean
+      theme_bw()+
+      Theme1+
+      xlab(\"Status\") + ylab(\"Abundance per stereo-BRUV\") +
+      ggtitle(\"Plot of abundance by Status\")")
+    )
+)
 )
