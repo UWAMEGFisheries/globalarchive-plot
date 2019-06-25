@@ -5,6 +5,6 @@ account: brookegibbons
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 985868
-bundleId: 2168311
+bundleId: 2175931
 url: https://brookegibbons.shinyapps.io/globalarchive-plot/
-when: 1561089041.7069
+when: 1561425558.01621
