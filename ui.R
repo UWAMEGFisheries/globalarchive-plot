@@ -105,6 +105,37 @@ navbarPage(
     )
   ),
   tabPanel(
+    "Habitat",
+    sidebarLayout(
+      sidebarPanel(
+        #
+        #fileInput("complete.length", "Upload complete length FST File",
+        #          accept = c("image/vnd.fst",
+        #                     ".fst")),
+        
+        # Select campaignid
+        selectInput(inputId = "mass.campaignid.selector", label = "CampaignID",
+                    choices = NULL),
+        # Select metric
+        #htmlOutput("length.key.selector"),
+        # Select Fam, Gen and spe
+        #htmlOutput("mass.family.selector"),
+        #htmlOutput("mass.genus.selector"),
+        #htmlOutput("mass.species.selector"),
+        
+        #helpText(h4("",
+                    "Adjust plotting parameters below.")),
+        #radioButtons("mass.colour.fill", "Colour and Fill by",choices = list("Status" = "status", "Location" = "location","Site" = "site"),selected = "status"),
+        #numericInput("mass.binwidth","Binwidth", value = 5)),
+      mainPanel(
+        leafletOutput(outputId = "mass.spatial.plot", height = "500px"),
+        plotOutput(outputId = "mass.histogram", height = "300px"),
+        plotOutput(outputId = "length.vs.mass", height = "300px")
+        
+      )
+    )
+  ),
+  tabPanel(
     "Download Scripts",
     #headerPanel("Simple Shiny Ace!"),
     sidebarPanel(
