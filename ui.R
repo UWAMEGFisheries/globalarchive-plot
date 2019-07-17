@@ -133,8 +133,7 @@ navbarPage(
         plotOutput(outputId = "length.vs.mass", height = "300px")
         
       )
-    )
-  ),
+    ),
   tabPanel(
     "Download Scripts",
     #headerPanel("Simple Shiny Ace!"),
@@ -149,8 +148,7 @@ navbarPage(
       #actionButton("clear", "Clear text"),
       HTML("<hr />"),
       helpText(HTML("A simple Shiny Ace editor.
-                  <p>Created using <a href = \"http://github.com/trestletech/shinyAce\">shinyAce</a>."))
-    ),
+                  <p>Created using <a href = \"http://github.com/trestletech/shinyAce\">shinyAce</a>."))),
     mainPanel(
       aceEditor("ace", theme = "tomorrow_night_blue", mode = "r", value = "# functions for summarising data on plots----
 se <- function(x) sd(x) / sqrt(length(x))
