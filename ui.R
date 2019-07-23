@@ -123,8 +123,7 @@ navbarPage(
         #htmlOutput("mass.genus.selector"),
         #htmlOutput("mass.species.selector"),
         
-        #helpText(h4("",
-                    "Adjust plotting parameters below.")),
+        helpText(h4("","Adjust plotting parameters below."))),
         #radioButtons("mass.colour.fill", "Colour and Fill by",choices = list("Status" = "status", "Location" = "location","Site" = "site"),selected = "status"),
         #numericInput("mass.binwidth","Binwidth", value = 5)),
       mainPanel(
@@ -133,7 +132,7 @@ navbarPage(
         plotOutput(outputId = "length.vs.mass", height = "300px")
         
       )
-    ),
+    )),
   tabPanel(
     "Download Scripts",
     #headerPanel("Simple Shiny Ace!"),
